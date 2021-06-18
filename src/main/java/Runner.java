@@ -11,7 +11,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -24,17 +27,30 @@ public class Runner {
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        System.out.println("How many users ? ");
-        int n = scan.nextInt();
         Runner runner = new Runner();
-        while (n > 0) {
-            n--;
-            JSONObject jObj = runner.addContact();
-            array.add(jObj);
-        }
+
+        JSONObject jObj = runner.addContact();
+        array.add(jObj);
         writeToFile(array);
+        readFromFile();
     }
+
+    private static void readFromFile() {
+        String path = "/Users/prateek/CuCumberTest/ContactManagementSyste,/src/main/resources/DataFile.json";
+        JsonParser parser = new JsonParser();
+        try {
+            Object obj = parser.parse(new FileReader(path));
+            JSONArray jObj = (JSONArray) obj;
+
+            Iterator<JSONObject> iter = jObj.iterator();
+            while (iter.hasNext()) {
+                System.out.println(iter.next());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public JSONObject addContact() {
 

@@ -4,7 +4,7 @@ public class Contact {
     int mobile;
     String email;
     String imageUrl;
-    String DOB;
+    String DOB = "xxXXxx";
     String platform = "iOS";
 
 }
