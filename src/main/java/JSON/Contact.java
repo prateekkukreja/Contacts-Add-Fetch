@@ -1,3 +1,5 @@
+package JSON;
+
 public class Contact {
 
     String name;

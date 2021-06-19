@@ -12,7 +12,7 @@
 //    ObjectMapper mapper = new ObjectMapper();
 //    JSONParser parser = new JSONParser();
 //
-//    public AddContact(Contact details) {
+//    public AddContact(JSON.Contact details) {
 //        try {
 //            String json = details.toString();
 //            UserInput user = g.fromJson(json, UserInput.class);
