@@ -1,79 +1,107 @@
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.github.cliftonlabs.json_simple.Jsoner;
 import commons.Utilities;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Random;
+import javax.rmi.CORBA.Util;
+import java.io.BufferedWriter;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Runner {
 
-    static JSONObject object = new JSONObject();
-    static JSONArray array = new JSONArray();
-    Contact contactObj = new Contact();
-//    Utilities utils = new Utilities();
+    //    Contact contact = new Contact();
+    static JSONArray jArr = new JSONArray();
+    String path = System.getProperty("user.dir") + "/src/main/resources/DataFile.json";
+    static String name = "";
+    static String mobile = "";
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
-        Runner runner = new Runner();
 
-        JSONObject jObj = runner.addContact();
-        array.add(jObj);
-        writeToFile(array);
-        readFromFile();
+        Runner runner = new Runner();
+        Scanner scan = new Scanner(System.in);
+        runner.writeData();
+
+        System.out.println("Enter input : name or mobile");
+        String inp = scan.next();
+        System.out.println("Enter value to search");
+        String searchVal = scan.next();
+        if (inp.toLowerCase(Locale.ROOT).contains("name")) {
+            runner.getContactByName(searchVal);
+        } else if (inp.toLowerCase(Locale.ROOT).contains("mobile")) {
+            runner.getContactByMobile(searchVal);
+        }
     }
 
-    private static void readFromFile() {
-        String path = "/Users/prateek/CuCumberTest/ContactManagementSyste,/src/main/resources/DataFile.json";
-        JsonParser parser = new JsonParser();
+    private void getContactByMobile(String mobile) {
         try {
-            Object obj = parser.parse(new FileReader(path));
-            JSONArray jObj = (JSONArray) obj;
-
-            Iterator<JSONObject> iter = jObj.iterator();
-            while (iter.hasNext()) {
-                System.out.println(iter.next());
+            List<String> list = new ArrayList<>();
+            Reader reader = Files.newBufferedReader(Paths.get(path));
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode parser = objectMapper.readTree(reader);
+            for (int i = 0; i < parser.size(); i++) {
+                if (parser.get(i).get("mobile").toString().equals(mobile) || parser.get(i).get("mobile").toString().contains(mobile))
+                    list.add(parser.get(i).get("mobile").toString());
             }
+            System.out.println(list);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-    public JSONObject addContact() {
-
-        object.put(contactObj.name, new Utilities().getSaltString());
-        object.put(contactObj.mobile, new Utilities().getSaltString());
-        object.put(contactObj.email, new Utilities().getSaltString());
-
-        return object;
+    private void getContactByName(String name) {
+        try {
+            List<String> list = new ArrayList<>();
+            Reader reader = Files.newBufferedReader(Paths.get(path));
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode parser = objectMapper.readTree(reader);
+            for (int i = 0; i < parser.size(); i++) {
+                if (parser.get(i).get("name").toString().equals(name) || parser.get(i).get("name").toString().contains(name))
+                    list.add(parser.get(i).get("name").toString());
+            }
+            System.out.println(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void writeToFile(JSONArray array) {
+    private void writeData() {
+        JSONArray jArr = new JSONArray();
 
-        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         try {
-//            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//            JsonParser jp = new JsonParser();
-//            JsonElement je = jp.parse(array.toJSONString());
-//            String prettyJsonString = gson.toJson(je);
-            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(array.toJSONString());
-            mapper.writeValue(new File(System.getProperty("user.dir") + "/src/main/resources/DataFile.json"), json);
-        } catch (
-                IOException e) {
+            Utilities utils = new Utilities();
+            int size = utils.getInt();
+
+            for (int i = 0; i < size; i++) {
+                JSONObject contacts = new JSONObject();
+                Contact contact = new Contact();
+
+                utils = new Utilities();
+                String name = utils.getRandValString();
+                Long mobile = utils.getRandValInt();
+                contact.setName(name);
+                contact.setMobile(mobile);
+//                contacts.put(contact.mobile, mobile);
+
+                jArr.add(contact);
+            }
+
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(path));
+
+            ObjectMapper mapper = new ObjectMapper();
+            writer.write(mapper.writeValueAsString(jArr));
+//            for (int i = 0; i < jArr.size(); i++) {
+//                writer.write(mapper.writeValueAsString(jArr.get(i)) + ",\n");
+//            }
+            writer.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
